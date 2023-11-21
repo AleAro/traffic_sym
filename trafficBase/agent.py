@@ -1,31 +1,41 @@
+#agent.py
+import networkx as nx
 from mesa import Agent
+
+def heuristic(a, b):
+    (x1, y1) = a
+    (x2, y2) = b
+    return abs(x1 - x2) + abs(y1 - y2)  # Manhattan distance
 
 class Car(Agent):
     """
-    Agent that moves randomly.
-    Attributes:
-        unique_id: Agent's ID 
-        direction: Randomly chosen direction chosen from one of eight directions
+    Car agent that can find paths using A* algorithm.
     """
-    def __init__(self, unique_id, model):
-        """
-        Creates a new random agent.
-        Args:
-            unique_id: The agent's ID
-            model: Model reference for the agent
-        """
+    def __init__(self, unique_id, model, start, destination):
         super().__init__(unique_id, model)
+        self.start = start
+        self.destination = destination
+        self.path = []
+
+    def find_path(self):
+        # Assuming the model has a method to get the current graph representation
+        G = self.model.get_graph()
+        try:
+            self.path = nx.astar_path(G, self.start, self.destination, heuristic)
+        except nx.NetworkXNoPath:
+            print(f"No path found for {self.unique_id} from {self.start} to {self.destination}")
+            self.path = []
+
 
     def move(self):
-        """ 
-        Determines if the agent can move in the direction that was chosen
-        """        
-        self.model.grid.move_to_empty(self)
+        if self.path:
+            # Move along the path; for simplicity, just taking the next step
+            next_step = self.path.pop(0)
+            self.model.grid.move_agent(self, next_step)
 
     def step(self):
-        """ 
-        Determines the new direction it will take, and then moves
-        """
+        if not self.path:
+            self.find_path()
         self.move()
 
 class Traffic_Light(Agent):

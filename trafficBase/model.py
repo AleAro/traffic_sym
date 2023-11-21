@@ -1,8 +1,10 @@
+#model.py
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from agent import *
 import json
+import random
 
 class CityModel(Model):
     """ 
@@ -17,6 +19,7 @@ class CityModel(Model):
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
 
         self.traffic_lights = []
+        self.destinations = []
 
         # Load the map file. The map file is a text file where each character represents an agent.
         with open('city_files/2022_base.txt') as baseFile:
@@ -47,9 +50,47 @@ class CityModel(Model):
                     elif col == "D":
                         agent = Destination(f"d_{r*self.width+c}", self)
                         self.grid.place_agent(agent, (c, self.height - r - 1))
+                        self.destinations.append((c, self.height - r - 1))  # Add this line
 
         self.num_agents = N
         self.running = True
+    
+    def get_edge_cells(self):
+        '''Returns the cells at the edge of the grid, excluding duplicates.'''
+        cells = set()
+        for i in range(self.width):
+            cells.add((i, 0))
+            cells.add((i, self.height-1))
+        for i in range(1, self.height-1):
+            cells.add((0, i))
+            cells.add((self.width-1, i))
+        return list(cells)
+
+    def place_cars_on_edges(self):
+        '''Places the cars on the edge cells of the grid.'''
+        edge_cells = self.get_edge_cells()
+        suitable_edge_cells = [cell for cell in edge_cells if self.is_suitable_for_car(cell)]
+        
+        for i in range(self.num_agents):
+            if suitable_edge_cells and self.destinations:
+                start_pos = random.choice(suitable_edge_cells)
+                suitable_edge_cells.remove(start_pos)
+                destination = random.choice(self.destinations)
+                car = Car(f"car_{i}", self, start_pos, destination)
+                self.grid.place_agent(car, start_pos)
+
+    def is_suitable_for_car(self, cell):
+        '''Determines if a cell is suitable for placing a car.'''
+        # Check if the cell is a road and not occupied by obstacles or other unsuitable agents
+        cell_contents = self.grid.get_cell_list_contents(cell)
+        for agent in cell_contents:
+            if isinstance(agent, Obstacle) or isinstance(agent, Traffic_Light) or isinstance(agent, Destination):
+                return False  # Cell is not suitable if it contains an obstacle, traffic light, or destination
+        return True
+
+    def step(self):
+        '''Advance the model by one step.'''
+        self.schedule.step()
 
     def step(self):
         '''Advance the model by one step.'''
