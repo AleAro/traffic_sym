@@ -18,8 +18,7 @@ class Car(Agent):
         self.path = []
 
     def find_path(self):
-        # Assuming the model has a method to get the current graph representation
-        G = self.model.get_graph()
+        G = self.model.get_graph()  
         try:
             self.path = nx.astar_path(G, self.start, self.destination, heuristic)
         except nx.NetworkXNoPath:
@@ -29,9 +28,12 @@ class Car(Agent):
 
     def move(self):
         if self.path:
-            # Move along the path; for simplicity, just taking the next step
             next_step = self.path.pop(0)
             self.model.grid.move_agent(self, next_step)
+            # Check if destination is reached
+            if not self.path:  # Path is empty, meaning the destination is reached
+                print(f"Car {self.unique_id} has reached its destination.")
+                # Handle arrival, such as stopping the car or removing it
 
     def step(self):
         if not self.path:
