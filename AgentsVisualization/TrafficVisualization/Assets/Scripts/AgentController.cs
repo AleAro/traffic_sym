@@ -14,7 +14,7 @@ public class AgentData
 {
     /*
     The AgentData class is used to store the data of each agent.
-    
+
     Attributes:
         id (string): The id of the agent.
         x (float): The x coordinate of the agent.
@@ -104,14 +104,14 @@ public class AgentController : MonoBehaviour
 
         floor.transform.localScale = new Vector3((float)width/10, 1, (float)height/10);
         floor.transform.localPosition = new Vector3((float)width/2-0.5f, 0, (float)height/2-0.5f);
-        
+
         timer = timeToUpdate;
 
         // Launches a couroutine to send the configuration to the server.
         StartCoroutine(SendConfiguration());
     }
 
-    private void Update() 
+    private void Update()
     {
         if(timer < 0)
         {
@@ -143,15 +143,15 @@ public class AgentController : MonoBehaviour
             // dt = t * t * ( 3f - 2f*t);
         }
     }
- 
+
     IEnumerator UpdateSimulation()
     {
         UnityWebRequest www = UnityWebRequest.Get(serverUrl + updateEndpoint);
         yield return www.SendWebRequest();
- 
+
         if (www.result != UnityWebRequest.Result.Success)
             Debug.Log(www.error);
-        else 
+        else
         {
             StartCoroutine(GetAgentsData());
         }
@@ -190,16 +190,16 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    IEnumerator GetAgentsData() 
+    IEnumerator GetAgentsData()
     {
         // The GetAgentsData method is used to get the agents data from the server.
 
         UnityWebRequest www = UnityWebRequest.Get(serverUrl + getAgentsEndpoint);
         yield return www.SendWebRequest();
- 
+
         if (www.result != UnityWebRequest.Result.Success)
             Debug.Log(www.error);
-        else 
+        else
         {
             // Once the data has been received, it is stored in the agentsData variable.
             // Then, it iterates over the agentsData.positions list to update the agents positions.
@@ -228,14 +228,14 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    IEnumerator GetObstacleData() 
+    IEnumerator GetObstacleData()
     {
         UnityWebRequest www = UnityWebRequest.Get(serverUrl + getObstaclesEndpoint);
         yield return www.SendWebRequest();
- 
+
         if (www.result != UnityWebRequest.Result.Success)
             Debug.Log(www.error);
-        else 
+        else
         {
             obstacleData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
