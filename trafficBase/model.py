@@ -98,6 +98,13 @@ class CityModel(Model):
                             if self.is_road(nx, ny) or self.is_traffic_light(nx, ny):
                                 weight = self.calculate_edge_weight(x, y, nx, ny)
                                 self.G.add_edge((x, y), (nx, ny), weight=weight)
+                                if self.is_traffic_light(nx, ny):
+                                    nx += dx
+                                    ny += dy
+                                    if 0 <= nx < self.width and 0 <= ny < self.height:
+                                        if self.is_road(nx, ny):
+                                            weight = self.calculate_edge_weight(x, y, nx, ny)
+                                            self.G.add_edge((x, y), (nx, ny), weight=weight)
 
     def calculate_edge_weight(self, x, y, nx, ny):
         base_weight = 1
