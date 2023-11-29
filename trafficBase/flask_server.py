@@ -21,9 +21,9 @@ app = Flask("Traffic example")
 def initModel():
     global citymodel
 
-    number_agents = int(request.form.get('NAgents'))
-    width = int(request.form.get('width'))
-    height = int(request.form.get('height'))
+    number_agents = int(request.form.get('NAgents', 10))
+    width = int(request.form.get('width', 20))
+    height = int(request.form.get('height', 20))
     currentStep = 0
 
     print(request.form)
