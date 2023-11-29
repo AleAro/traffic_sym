@@ -8,7 +8,9 @@ from mesa.space import MultiGrid
 from agent import Car, Road, Traffic_Light, Obstacle, Destination  # Assuming these are defined in 'agent.py'
 
 class CityModel(Model):
-    def __init__(self, N, map_file, map_dict_file):
+    def __init__(self, N):
+        map_file = 'city_files/2023_base.txt'
+        map_dict_file = 'city_files/mapDictionary.json'
         self.dataDictionary = json.load(open(map_dict_file))
         self.traffic_lights = []
         self.destinations = []
@@ -197,6 +199,19 @@ class CityModel(Model):
     def is_traffic_light(self, x, y):
         contents = self.grid.get_cell_list_contents((x, y))
         return any(isinstance(content, Traffic_Light) for content in contents)
+
+    def get_agent_data(self):
+        agent_data = []
+        for agent in self.schedule.agents:
+            if isinstance (agent, Car):
+                agent_info = {
+                    "id": agent.unique_id,
+                    "x": agent.pos[0],
+                    "y": agent.pos[1],
+                }
+                agent_data.append(agent_info)
+        return agent_data
+
 
 
 if __name__ == "__main__":
