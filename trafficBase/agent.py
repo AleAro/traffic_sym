@@ -34,9 +34,11 @@ class Car(Agent):
         # Get cell in front of the car
         directions = {'Up': (0, 1), 'Down': (0, -1), 'Left': (-1, 0), 'Right': (1, 0)}
         direction = self.get_direction()
-        dx, dy = directions[direction]
-        front_x, front_y = self.pos[0] + dx, self.pos[1] + dy
-        next_cell = self.model.grid.get_cell_list_contents([(front_x, front_y)])
+        next_cell = None
+        if direction:
+            dx, dy = directions[direction]
+            front_x, front_y = self.pos[0] + dx, self.pos[1] + dy
+            next_cell = self.model.grid.get_cell_list_contents([(front_x, front_y)])
         # If the cell is a traffic light, and it is red, do not move
         if next_cell and isinstance(next_cell[0], Traffic_Light) and not next_cell[0].state:
             next_step = self.pos
@@ -48,11 +50,18 @@ class Car(Agent):
                 print(f"Car {self.unique_id} has reached its destination.")
 
     def get_direction(self):
-        current_node = self.model.grid.get_cell_list_contents([self.pos])
-        if current_node:
-            current_node = current_node[0]
-            if isinstance(current_node, Road):
-                return current_node.direction
+        # get the direction from the path the car is following
+        if self.path:
+            dx = self.path[0][0] - self.pos[0]
+            dy = self.path[0][1] - self.pos[1]
+            if dx == 1:
+                return 'Right'
+            elif dx == -1:
+                return 'Left'
+            elif dy == 1:
+                return 'Up'
+            elif dy == -1:
+                return 'Down'
 
     def step(self):
         if not self.path:
@@ -75,6 +84,8 @@ class Traffic_Light(Agent):
         """
         self.state = state
         self.timeToChange = timeToChange
+        self.direction = None
+
 
     def step(self):
         """

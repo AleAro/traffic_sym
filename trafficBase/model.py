@@ -28,7 +28,6 @@ class CityModel(Model):
 
         self.num_agents = N
         self.running = True
-        self.place_single_car()
         # Add code to place edges
         self.add_edges()
 
@@ -62,7 +61,7 @@ class CityModel(Model):
         if suitable_corners and self.destinations:
             start_pos = random.choice(suitable_corners)
             destination = random.choice(self.destinations)
-            car = Car("car_0", self, start_pos, destination)
+            car = Car("car_" + str(self.schedule.steps), self, start_pos, destination)
             self.grid.place_agent(car, start_pos)
             self.schedule.add(car)
 
@@ -173,11 +172,17 @@ class CityModel(Model):
         nx.draw_networkx_nodes(self.G, pos, nodelist=traffic_light_nodes, node_color="red", node_size=100)
         nx.draw_networkx_nodes(self.G, pos, nodelist=destination_nodes, node_color="green", node_size=100)
         nx.draw_networkx_edges(self.G, pos, arrowstyle='->', arrowsize=15, edge_color="gray")
+        # Add edge weights
+        edge_labels = nx.get_edge_attributes(self.G, 'weight')
+        nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels, font_size=10)
         plt.axis('off')
         plt.show()
 
     def step(self):
         self.schedule.step()
+        # Place a car every 10 steps
+        if self.schedule.steps % 10 == 1:
+            self.place_single_car()
 
     def update_graph_edge_weights(self, agent):
         for edge in self.G.edges:
