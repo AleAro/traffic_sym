@@ -53,7 +53,7 @@ with open('city_files/2022_base.txt') as baseFile:
     width = len(lines[0])
     height = len(lines)
 
-model_params = {"N":1, "map_file":'city_files/2022_base.txt', "map_dict_file":'city_files/mapDictionary.json'}
+model_params = {"N":1, "map_file":'city_files/2023_base.txt', "map_dict_file":'city_files/mapDictionary.json'}
 
 print(width, height)
 grid = CanvasGrid(agent_portrayal, width, height, 500, 500)

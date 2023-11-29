@@ -201,6 +201,6 @@ class CityModel(Model):
 
 
 if __name__ == "__main__":
-    model = CityModel(N=1, map_file='city_files/2022_base.txt', map_dict_file='city_files/mapDictionary.json')
+    model = CityModel(N=1, map_file='city_files/2023_base.txt', map_dict_file='city_files/mapDictionary.json')
     model.add_edges()
     model.visualize_graph()
