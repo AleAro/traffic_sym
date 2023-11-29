@@ -48,6 +48,11 @@ class Car(Agent):
             self.model.grid.move_agent(self, next_step)
             if self.pos == self.destination:
                 print(f"Car {self.unique_id} has reached its destination.")
+                self.model.schedule.remove(self)
+                self.model.grid.remove_agent(self)
+
+        if self.pos is None:
+            return
 
         # Checamos si hay mas de 3 carros en frente
         neighborhood_three = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False, radius=3)
