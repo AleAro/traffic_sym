@@ -209,8 +209,12 @@ public class AgentController : MonoBehaviour
             {
                 Vector3 newAgentPosition = new Vector3(agent.x, agent.y, agent.z);
                 if (!agents.ContainsKey(agent.id)) 
-                    {GameObject newAgent = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity); agents.Add(agent.id, newAgent);}
-                     yield return null;
+                    {
+                        GameObject newAgent = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity); agents.Add(agent.id, newAgent);
+                        yield return null;
+                    }
+                else {
+                 
                     if(!started)
                     {
                         prevPositions[agent.id] = newAgentPosition;
@@ -223,6 +227,8 @@ public class AgentController : MonoBehaviour
                             prevPositions[agent.id] = currentPosition;
                         currPositions[agent.id] = newAgentPosition;
                     }
+
+                }
             }
 
             updated = true;

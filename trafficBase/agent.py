@@ -50,7 +50,7 @@ class Car(Agent):
                 print(f"Car {self.unique_id} has reached its destination.")
 
         # Checamos si hay mas de 3 carros en frente
-        neighborhood_three = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False, radius=3)
+        #neighborhood_three = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False, radius=3)
         if direction:
             dx, dy = directions[direction]
             front_three_x = [self.pos[0] + dx, self.pos[0] + 2*dx, self.pos[0] + 3*dx]
