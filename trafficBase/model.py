@@ -119,12 +119,30 @@ class CityModel(Model):
                             self.G.add_edge((x, y), (nnx, nny), weight=self.calculate_edge_weight(x, y, nnx, nny))
 
     def add_traffic_light_edges(self, x, y, directions):
-        for direction in directions.values():
-            dx, dy = direction
-            nx, ny = x + dx, y + dy
-            if self.valid_position(nx, ny) and (self.is_road(nx, ny) or self.is_destination(nx, ny)):
-                weight = self.calculate_edge_weight(x, y, nx, ny)
-                self.G.add_edge((x, y), (nx, ny), weight=weight)
+        for dir_name, (dx, dy) in directions.items():
+            adjacent_x, adjacent_y = x + dx, y + dy
+
+            if self.valid_position(adjacent_x, adjacent_y) and self.is_road(adjacent_x, adjacent_y):
+                adjacent_contents = self.grid.get_cell_list_contents((adjacent_x, adjacent_y))
+                road = next((c for c in adjacent_contents if isinstance(c, Road)), None)
+                if road:
+                    if self.aligns_with_road_direction(road, x, y, adjacent_x, adjacent_y):
+                        self.G.add_edge((adjacent_x, adjacent_y), (x, y), weight=self.calculate_edge_weight(adjacent_x, adjacent_y, x, y))
+                    else:
+                        self.G.add_edge((x, y), (adjacent_x, adjacent_y), weight=self.calculate_edge_weight(x, y, adjacent_x, adjacent_y))
+
+    def aligns_with_road_direction(self, road, tl_x, tl_y, road_x, road_y):
+        if road.direction == "Up" and road_y < tl_y:
+            return True
+        if road.direction == "Down" and road_y > tl_y:
+            return True
+        if road.direction == "Left" and road_x > tl_x:
+            return True
+        if road.direction == "Right" and road_x < tl_x:
+            return True
+        return False
+
+
 
     def add_destination_edges(self, x, y, directions):
         for direction in directions.values():
