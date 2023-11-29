@@ -29,6 +29,8 @@ class CityModel(Model):
         self.num_agents = N
         self.running = True
         self.place_single_car()
+        # Add code to place edges
+        self.add_edges()
 
     def process_cell(self, r, c, col):
         if col in ["v", "^", ">", "<", "u", "g", "h", "k"]:
@@ -62,6 +64,7 @@ class CityModel(Model):
             destination = random.choice(self.destinations)
             car = Car("car_0", self, start_pos, destination)
             self.grid.place_agent(car, start_pos)
+            self.schedule.add(car)
 
     def is_suitable_for_car(self, cell):
         cell_contents = self.grid.get_cell_list_contents(cell)
@@ -77,34 +80,62 @@ class CityModel(Model):
 
     def add_edges(self):
         directions = {'Up': (0, 1), 'Down': (0, -1), 'Left': (-1, 0), 'Right': (1, 0)}
+        diagonal_directions = {
+            'Up': [('Up', 'Right'), ('Up', 'Left')],
+            'Down': [('Down', 'Right'), ('Down', 'Left')],
+            'Left': [('Left', 'Up'), ('Left', 'Down')],
+            'Right': [('Right', 'Up'), ('Right', 'Down')]
+        }
+
         for x in range(self.width):
             for y in range(self.height):
                 contents = self.grid.get_cell_list_contents((x, y))
                 if self.is_destination(x, y):
-                    for direction in directions.values():
-                        dx, dy = direction
-                        nx, ny = x + dx, y + dy
-                        if 0 <= nx < self.width and 0 <= ny < self.height:
-                            if self.is_road(nx, ny):
-                                weight = self.calculate_edge_weight(x, y, nx, ny)
-                                self.G.add_edge((nx, ny), (x, y), weight=weight)
-                if self.is_road(x, y):
-                    road = next(c for c in contents if isinstance(c, Road))
-                    road_directions = road.direction if isinstance(road.direction, list) else [road.direction]
-                    for direction in (road_directions if isinstance(road_directions, list) else [road_directions]):
-                        dx, dy = directions[direction]
-                        nx, ny = x + dx, y + dy
-                        if 0 <= nx < self.width and 0 <= ny < self.height:
-                            if self.is_road(nx, ny) or self.is_traffic_light(nx, ny):
-                                weight = self.calculate_edge_weight(x, y, nx, ny)
-                                self.G.add_edge((x, y), (nx, ny), weight=weight)
-                                if self.is_traffic_light(nx, ny):
-                                    nx += dx
-                                    ny += dy
-                                    if 0 <= nx < self.width and 0 <= ny < self.height:
-                                        if self.is_road(nx, ny):
-                                            weight = self.calculate_edge_weight(x, y, nx, ny)
-                                            self.G.add_edge((x, y), (nx, ny), weight=weight)
+                    # Add edges for destinations
+                    self.add_destination_edges(x, y, directions)
+                elif self.is_road(x, y):
+                    # Add edges for roads, including diagonal edges
+                    road = next((c for c in contents if isinstance(c, Road)), None)
+                    if road:
+                        self.add_road_edges(x, y, road, directions, diagonal_directions)
+                elif self.is_traffic_light(x, y):
+                    # Add only straight edges for traffic lights
+                    self.add_traffic_light_edges(x, y, directions)
+
+    def add_road_edges(self, x, y, road, directions, diagonal_directions):
+        road_directions = road.direction if isinstance(road.direction, list) else [road.direction]
+        for direction in road_directions:
+            dx, dy = directions[direction]
+            nx, ny = x + dx, y + dy
+            if self.valid_position(nx, ny) and not self.is_traffic_light(nx, ny):
+                weight = self.calculate_edge_weight(x, y, nx, ny)
+                self.G.add_edge((x, y), (nx, ny), weight=weight)
+                # Add diagonal edges in the direction of the road
+                if direction in diagonal_directions:
+                    for diag in diagonal_directions[direction]:
+                        ddx, ddy = (directions[diag[0]][0] + directions[diag[1]][0], directions[diag[0]][1] + directions[diag[1]][1])
+                        nnx, nny = x + ddx, y + ddy
+                        if self.valid_position(nnx, nny) and not self.is_traffic_light(nnx, nny):
+                            self.G.add_edge((x, y), (nnx, nny), weight=self.calculate_edge_weight(x, y, nnx, nny))
+
+    def add_traffic_light_edges(self, x, y, directions):
+        for direction in directions.values():
+            dx, dy = direction
+            nx, ny = x + dx, y + dy
+            if self.valid_position(nx, ny) and (self.is_road(nx, ny) or self.is_destination(nx, ny)):
+                weight = self.calculate_edge_weight(x, y, nx, ny)
+                self.G.add_edge((x, y), (nx, ny), weight=weight)
+
+    def add_destination_edges(self, x, y, directions):
+        for direction in directions.values():
+            dx, dy = direction
+            nx, ny = x + dx, y + dy
+            if self.valid_position(nx, ny) and self.is_road(nx, ny):
+                weight = self.calculate_edge_weight(x, y, nx, ny)
+                self.G.add_edge((nx, ny), (x, y), weight=weight)
+
+    def valid_position(self, x, y):
+        return 0 <= x < self.width and 0 <= y < self.height and (self.is_road(x, y) or self.is_traffic_light(x, y) or self.is_destination(x, y))
 
     def calculate_edge_weight(self, x, y, nx, ny):
         base_weight = 1
@@ -130,9 +161,12 @@ class CityModel(Model):
     def step(self):
         self.schedule.step()
 
-    def update_graph_edge_weights(self, tl):
-        for edge in self.G.edges(tl.pos):
-            self.G.edges[edge]['weight'] = self.calculate_edge_weight(*edge)
+    def update_graph_edge_weights(self, agent):
+        for edge in self.G.edges:
+            start_node, end_node = edge
+            start_x, start_y = start_node
+            end_x, end_y = end_node
+            self.G.edges[edge]['weight'] = self.calculate_edge_weight(start_x, start_y, end_x, end_y)
 
     def recalculate_paths(self):
         for agent in self.schedule.agents:

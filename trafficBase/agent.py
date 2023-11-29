@@ -1,11 +1,12 @@
 #agent.py
 import networkx as nx
 from mesa import Agent
+import math
 
 def heuristic(a, b):
     (x1, y1) = a
     (x2, y2) = b
-    return abs(x1 - x2) + abs(y1 - y2)  # Manhattan distance
+    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
 class Car(Agent):
     """
@@ -19,7 +20,9 @@ class Car(Agent):
         self.path = []
 
     def find_path(self):
-        G = self.model.get_graph()
+        # Directly access the graph
+        G = self.model.G
+        print(G)
         try:
             self.path = nx.astar_path(G, self.start, self.destination, heuristic)
             print(f"Car {self.unique_id} found path from {self.start} to {self.destination}")
@@ -28,14 +31,31 @@ class Car(Agent):
             self.path = []
 
     def move(self):
+        # Get cell in front of the car
+        directions = {'Up': (0, 1), 'Down': (0, -1), 'Left': (-1, 0), 'Right': (1, 0)}
+        direction = self.get_direction()
+        dx, dy = directions[direction]
+        front_x, front_y = self.pos[0] + dx, self.pos[1] + dy
+        next_cell = self.model.grid.get_cell_list_contents([(front_x, front_y)])
+        # If the cell is a traffic light, and it is red, do not move
+        if next_cell and isinstance(next_cell[0], Traffic_Light) and not next_cell[0].state:
+            next_step = self.pos
+            return
         if self.path:
             next_step = self.path.pop(0)
             self.model.grid.move_agent(self, next_step)
             if self.pos == self.destination:
                 print(f"Car {self.unique_id} has reached its destination.")
 
+    def get_direction(self):
+        current_node = self.model.grid.get_cell_list_contents([self.pos])
+        if current_node:
+            current_node = current_node[0]
+            if isinstance(current_node, Road):
+                return current_node.direction
+
     def step(self):
-        if not self.path or self.model.need_to_recalculate_path(self):
+        if not self.path:
             self.find_path()
         self.move()
 
@@ -50,7 +70,7 @@ class Traffic_Light(Agent):
         Args:
             unique_id: The agent's ID
             model: Model reference for the agent
-            state: Whether the traffic light is green or red
+            state: Whether the traffic light is green (True) or red (False)
             timeToChange: After how many step should the traffic light change color
         """
         self.state = state
