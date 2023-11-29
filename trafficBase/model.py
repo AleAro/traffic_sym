@@ -26,6 +26,7 @@ class CityModel(Model):
                 for c, col in enumerate(row.strip()):
                     self.process_cell(r, c, col)
 
+
         self.num_agents = N
         self.running = True
         # Add code to place edges
@@ -115,7 +116,7 @@ class CityModel(Model):
                         ddx, ddy = (directions[diag[0]][0] + directions[diag[1]][0], directions[diag[0]][1] + directions[diag[1]][1])
                         nnx, nny = x + ddx, y + ddy
                         if self.valid_position(nnx, nny) and not self.is_traffic_light(nnx, nny):
-                            self.G.add_edge((x, y), (nnx, nny), weight=self.calculate_edge_weight(x, y, nnx, nny))
+                            self.G.add_edge((x, y), (nnx, nny), weight=weight * 1.5)
 
     def add_traffic_light_edges(self, x, y, directions):
         for dir_name, (dx, dy) in directions.items():
@@ -140,8 +141,6 @@ class CityModel(Model):
         if road.direction == "Right" and road_x < tl_x:
             return True
         return False
-
-
 
     def add_destination_edges(self, x, y, directions):
         for direction in directions.values():

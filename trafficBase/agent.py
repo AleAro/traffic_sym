@@ -49,6 +49,26 @@ class Car(Agent):
             if self.pos == self.destination:
                 print(f"Car {self.unique_id} has reached its destination.")
 
+        # Checamos si hay mas de 3 carros en frente
+        neighborhood_three = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False, radius=3)
+        if direction:
+            dx, dy = directions[direction]
+            front_three_x = [self.pos[0] + dx, self.pos[0] + 2*dx, self.pos[0] + 3*dx]
+            front_three_y = [self.pos[1] + dy, self.pos[1] + 2*dy, self.pos[1] + 3*dy]
+            next_three_cells = [self.model.grid.get_cell_list_contents([front_three_x[i], front_three_y[i]]) for i in range(3)]
+            next_three_cells = [True if next_three_cells[i] and isinstance(next_three_cells[i][0], Car) else False for i in range(3)]
+            if all(next_three_cells):
+                # Change lanes
+                if direction == 'Up':
+                    self.path = self.path[:1] + [(self.pos[0] - 1, self.pos[1] + 1)] + self.path[1:]
+                elif direction == 'Down':
+                    self.path = self.path[:1] + [(self.pos[0] + 1, self.pos[1] - 1)] + self.path[1:]
+                elif direction == 'Left':
+                    self.path = self.path[:1] + [(self.pos[0] - 1, self.pos[1] - 1)] + self.path[1:]
+                elif direction == 'Right':
+                    self.path = self.path[:1] + [(self.pos[0] + 1, self.pos[1] + 1)] + self.path[1:]
+                return
+
     def get_direction(self):
         # get the direction from the path the car is following
         if self.path:
