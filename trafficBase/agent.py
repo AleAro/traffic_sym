@@ -62,9 +62,10 @@ class Car(Agent):
             front_three_y = [self.pos[1] + dy, self.pos[1] + 2*dy, self.pos[1] + 3*dy]
             valid_positions = [(x,y) for x,y in zip(front_three_x, front_three_y) if self.model.valid_position(x,y)]
             next_three_cells = [self.model.grid.get_cell_list_contents(pos) for pos in valid_positions]
-            next_three_cells_occupied = [True if cell and isinstance(cell[0], Car) else False for cell in next_three_cells]
+
+            next_three_cells_occupied = [any([isinstance(c, Car)]) for cell in next_three_cells for c in cell]
             if all(next_three_cells_occupied):
-                # Determine the new next_step for lane change
+                print(next_three_cells_occupied)
                 if direction == 'Up':
                     lane_change_step = (self.pos[0] - 1, self.pos[1])
                 elif direction == 'Down':
@@ -74,7 +75,6 @@ class Car(Agent):
                 elif direction == 'Right':
                     lane_change_step = (self.pos[0], self.pos[1] + 1)
 
-                # Check if the lane change step is valid and recalculate the path
                 if self.model.valid_position(*lane_change_step):
                     self.recalculate_path(start=lane_change_step)
                     next_step = lane_change_step

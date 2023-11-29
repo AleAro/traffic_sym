@@ -99,7 +99,6 @@ class CityModel(Model):
                     if road:
                         self.add_road_edges(x, y, road, directions, diagonal_directions)
                 elif self.is_traffic_light(x, y):
-                    # Add only straight edges for traffic lights
                     self.add_traffic_light_edges(x, y, directions)
 
     def add_road_edges(self, x, y, road, directions, diagonal_directions):
@@ -116,7 +115,7 @@ class CityModel(Model):
                         ddx, ddy = (directions[diag[0]][0] + directions[diag[1]][0], directions[diag[0]][1] + directions[diag[1]][1])
                         nnx, nny = x + ddx, y + ddy
                         if self.valid_position(nnx, nny) and not self.is_traffic_light(nnx, nny):
-                            self.G.add_edge((x, y), (nnx, nny), weight=weight * 1.5)
+                            self.G.add_edge((x, y), (nnx, nny), weight=weight * 3)
 
     def add_traffic_light_edges(self, x, y, directions):
         for dir_name, (dx, dy) in directions.items():
@@ -180,7 +179,7 @@ class CityModel(Model):
     def step(self):
         self.schedule.step()
         # Place a car every 10 steps
-        if self.schedule.steps % 10 == 1:
+        if self.schedule.steps % 5 == 1:
             self.place_single_car()
 
     def update_graph_edge_weights(self, agent):
@@ -193,7 +192,7 @@ class CityModel(Model):
     def recalculate_paths(self):
         for agent in self.schedule.agents:
             if isinstance(agent, Car):
-                agent.recalculate_path()  # Assuming each car has a method to recalculate its path
+                agent.recalculate_path()
 
     def is_traffic_light(self, x, y):
         contents = self.grid.get_cell_list_contents((x, y))
