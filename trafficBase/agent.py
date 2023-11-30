@@ -50,6 +50,8 @@ class Car(Agent):
                 print(f"Car {self.unique_id} has reached its destination.")
                 self.model.schedule.remove(self)
                 self.model.grid.remove_agent(self)
+                self.model.active_agents -= 1
+                self.model.arrived_agents += 1
 
         if self.pos is None:
             return

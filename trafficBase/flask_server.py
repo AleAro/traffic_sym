@@ -32,7 +32,7 @@ def initModel():
     citymodel = CityModel(number_agents)
 
     return jsonify({"message":"Parameters recieved, model initiated."})
-    
+
 
 
 @app.route('/getAgents', methods=['GET'])
@@ -43,6 +43,13 @@ def getAgents():
     print(agent_data)
     return jsonify({'positions': agent_data})
 
+@app.route('/getSemaphores', methods=['GET'])
+def getSemaphores():
+    if citymodel is None: return
+    agent_data = citymodel.get_semaphores()
+
+    print(agent_data)
+    return jsonify({'positions': agent_data})
 
 @app.route('/getObstacles', methods=['GET'])
 def getObstacles():
