@@ -1,3 +1,4 @@
+#model.py
 import networkx as nx
 import json
 import random
@@ -15,6 +16,7 @@ class CityModel(Model):
         self.traffic_lights = []
         self.destinations = []
         self.G = nx.DiGraph()  # Graph representing the city
+        self.car_id_counter = 0
 
         with open(map_file) as baseFile:
             lines = baseFile.readlines()
@@ -62,11 +64,13 @@ class CityModel(Model):
         suitable_corners = [corner for corner in corners if self.is_suitable_for_car(corner)]
 
         if suitable_corners and self.destinations:
-            start_pos = random.choice(suitable_corners)
-            destination = random.choice(self.destinations)
-            car = Car("car_" + str(self.schedule.steps), self, start_pos, destination)
-            self.grid.place_agent(car, start_pos)
-            self.schedule.add(car)
+                    start_pos = random.choice(suitable_corners)
+                    destination = random.choice(self.destinations)
+                    car_graph = self.generate_graph_for_car("car_" + str(self.car_id_counter))  # Use the counter for unique ID
+                    car = Car("car_" + str(self.car_id_counter), self, start_pos, destination, car_graph)
+                    self.grid.place_agent(car, start_pos)
+                    self.schedule.add(car)
+                    self.car_id_counter += 1  # Increment the counter after adding a car
 
     def is_suitable_for_car(self, cell):
         cell_contents = self.grid.get_cell_list_contents(cell)
@@ -180,7 +184,6 @@ class CityModel(Model):
 
     def step(self):
         self.schedule.step()
-        # Place a car every 10 steps
         if self.schedule.steps % 5 == 1:
             self.place_single_car()
 
@@ -211,6 +214,9 @@ class CityModel(Model):
                 }
                 agent_data.append(agent_info)
         return agent_data
+
+    def generate_graph_for_car(self, car_id):
+        return self.G.copy()
 
 
 
