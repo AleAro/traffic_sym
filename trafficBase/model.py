@@ -167,7 +167,7 @@ class CityModel(Model):
     def calculate_edge_weight(self, x, y, nx, ny):
         base_weight = 1
         next_contents = self.grid.get_cell_list_contents((nx, ny))
-        if any(isinstance(c, Traffic_Light) and c.state == "on" for c in next_contents):
+        if any(isinstance(c, Traffic_Light) and c.state == False for c in next_contents):
             return base_weight * 10
         return base_weight
 
@@ -190,13 +190,15 @@ class CityModel(Model):
 
     def step(self):
         self.schedule.step()
-        if self.schedule.steps % 5 == 1:
+        if self.schedule.steps % 3 == 1:
             self.place_single_car()
 
         # Make a post request to the server every 100 steps
-        '''if self.schedule.steps % 100 == 0:
+        if self.schedule.steps % 100 == 0:
             post(self.arrived_agents)
-        '''
+
+        if self.schedule.steps == 1000:
+            self.running = False
 
     def update_graph_edge_weights(self, agent):
         for edge in self.G.edges:
@@ -245,12 +247,12 @@ class CityModel(Model):
 
 def post(num_cars):
     url = "http://52.1.3.19:8585/api/"
-    endpoint = "validate_attempt"
+    endpoint = "attempts"
 
     data = {
-        "year" : 2020,
-        "classroom" : 301,
-        "name" : "Equipo 1",
+        "year" : 2023,
+        "classroom" : 302,
+        "name" : "Equipo BBT",
         "num_cars": num_cars,
     }
 
@@ -267,6 +269,6 @@ def post(num_cars):
     print("Response:", response.json())
 
 if __name__ == "__main__":
-    model = CityModel(N=1, map_file='city_files/2023_base.txt', map_dict_file='city_files/mapDictionary.json')
+    model = CityModel(N=1)
     model.add_edges()
     model.visualize_graph()

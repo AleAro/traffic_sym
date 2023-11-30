@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1800
     height: 1094
   m_ShowMode: 4
-  m_Title: Scene
+  m_Title: Hierarchy
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 371}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 15335
+  controlID: 17
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -144,7 +144,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 15336
+  controlID: 18
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 15337
+  controlID: 19
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -247,7 +247,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 15226
+  controlID: 50
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -651,7 +651,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 48, y: 48}
+      snapOffset: {x: 48, y: 10}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: UnityEditor.SceneViewCameraOverlay
@@ -670,9 +670,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: -0.043647885, y: 0.18039083, z: -0.59163654}
+    m_Target: {x: -2.237667, y: 4.240183, z: 9.78734}
     speed: 2
-    m_Value: {x: -0.043647885, y: 0.18039083, z: -0.59163654}
+    m_Value: {x: -2.237667, y: 4.240183, z: 9.78734}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -718,13 +718,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.002648736, y: -0.95215625, z: 0.30552745, w: -0.008293428}
+    m_Target: {x: 0.26968986, y: -0.70735663, z: 0.34299263, w: 0.5561438}
     speed: 2
-    m_Value: {x: -0.0031069862, y: -0.95213115, z: 0.3055194, w: -0.009721535}
+    m_Value: {x: 0.26968634, y: -0.70734745, z: 0.34298816, w: 0.5561366}
   m_Size:
     m_Target: 20.085249
     speed: 2
-    m_Value: 20.100325
+    m_Value: 20.085249
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -822,7 +822,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 4ac6faff8e09fbff2e0bfbffe4c2fbff5ec5fbff14e6fbff0605fcff2415fcffc028feff1eeafeff6a9fffff6eb3ffff48b5ffff
+      m_ExpandedIDs: 32fbffff78590000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -906,24 +906,24 @@ MonoBehaviour:
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 182.00165}
-    m_SelectedIDs: e8730000
-    m_LastClickedID: 29672
-    m_ExpandedIDs: 00000000341e0000381e0000481e00006c1e0000dc730000408700005887000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 134}
+    m_SelectedIDs: 505a0000
+    m_LastClickedID: 23120
+    m_ExpandedIDs: 000000003a5a00003c5a00003e5a0000405a000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: CityVoxelPack
-      m_OriginalName: CityVoxelPack
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 7732
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 11}
     m_SearchString: 
@@ -937,7 +937,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000381e0000481e00006c1e0000dc73000000ca9a3bffffff7f
+    m_ExpandedIDs: 000000003a5a00003c5a00003e5a0000405a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -964,7 +964,7 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 0
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c623000046890000
     m_RenameOverlay:
       m_UserAcceptedRename: 0

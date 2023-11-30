@@ -20,6 +20,7 @@ class Car(Agent):
         print(f"Car {self.unique_id} created with start {self.start} and destination {self.destination}")
         self.path = []
         self.arrived = False
+        self.steps_stopped = 0
 
     def find_path(self):
         # Directly access the graph
@@ -96,6 +97,11 @@ class Car(Agent):
                 else:
                     next_step = self.pos
 
+        if next_step == self.pos:
+            self.steps_stopped += 1
+            if self.steps_stopped > 10:
+                self.recalculate_path(start=self.pos)
+                self.steps_stopped = 0
     def recalculate_path(self, start=None, destination=None):
             # Recalculate the path from the current position to the destination
             if start:
