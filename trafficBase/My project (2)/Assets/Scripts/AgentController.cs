@@ -14,6 +14,7 @@ public class AgentData
 {
     public string id;
     public float x, y, z;
+    public bool arrived;
 
     public AgentData(string id, float x, float y, float z)
     {
@@ -249,12 +250,13 @@ public class AgentController : MonoBehaviour
                 }
 
                 bool arrived = agentData.arrived;
-                if(arrived) {
-                  // Destroy it and delete it from the rest of the dictionaries
-                  Destroy(agents[agentData.id]);
-                  agents.Remove(agentData.id);
-                  prevPositions.Remove(agentData.id);
-                  currPositions.Remove(agentData.id);
+                if (arrived)
+                {
+                    // Destroy it and delete it from the rest of the dictionaries
+                    Destroy(agents[agentData.id]);
+                    agents.Remove(agentData.id);
+                    prevPositions.Remove(agentData.id);
+                    currPositions.Remove(agentData.id);
                 }
 
                 currPositions[agentData.id] = agentPosition;
