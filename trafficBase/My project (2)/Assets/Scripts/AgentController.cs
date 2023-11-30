@@ -36,20 +36,52 @@ public class AgentsData
 
 [Serializable]
 
+public class SemaphoreData
+{
+    public string id;
+    public float x, y, z;
+    public bool state;
+
+    public SemaphoreData(string id, float x, float y, float z, bool state)
+    {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.state = state;
+    }
+}
+
+[Serializable]
+
+public class SemaphoresData
+{
+    public List<SemaphoreData> positions;
+
+    public SemaphoresData() => this.positions = new List<SemaphoreData>();
+}
+
+[Serializable]
+
 
 public class AgentController : MonoBehaviour
 {
     string serverUrl = "http://localhost:8585";
     string getAgentsEndpoint = "/getAgents";
+    string semaphoreEndpoint = "/getSemaphores";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
     AgentsData agentsData;
+    SemaphoresData semaphoresData;
     Dictionary<string, GameObject> agents;
     Dictionary<string, Vector3> prevPositions, currPositions;
+    Dictionary<string, GameObject> semaphores;
+    Dictionary<string, bool> semaphoresStates;
 
     bool updated = false, started = false;
 
     public GameObject agentPrefab;
+    public GameObject semaphorePrefab;
     public int NAgents;
     private int width = 26, height = 26;
     public float timeToUpdate = 5.0f;
@@ -64,6 +96,10 @@ public class AgentController : MonoBehaviour
 
         agents = new Dictionary<string, GameObject>();
 
+        semaphoresData = new SemaphoresData();
+
+        semaphores = new Dictionary<string, GameObject>();
+        semaphoresStates = new Dictionary<string, bool>();
        //floor.transform.localScale = new Vector3((float)width / 10, 1, (float)height / 10);
        // floor.transform.localPosition = new Vector3((float)width / 2 - 0.5f, 0, (float)height / 2 - 0.5f);
 
@@ -128,7 +164,8 @@ public class AgentController : MonoBehaviour
         else
         {
             StartCoroutine(GetAgentsData());
-           
+            StartCoroutine(GetSemaphoresData());
+
         }
     }
 
@@ -153,6 +190,7 @@ public class AgentController : MonoBehaviour
             Debug.Log("Getting Agents positions");
 
             StartCoroutine(GetAgentsData());
+            StartCoroutine(GetSemaphoresData());
         }
     }
 
@@ -236,5 +274,71 @@ public class AgentController : MonoBehaviour
             updated = true;
             if (!started) started = true;
         }
+    }
+
+    IEnumerator GetSemaphoresData()
+    {
+      UnityWebRequest www = UnityWebRequest.Get(serverUrl + semaphoreEndpoint);
+      yield return www.SendWebRequest();
+
+      if(www.result != UnityWebRequest.Result.Success)
+      {
+        Debug.Log(www.error);
+      }
+      else
+      {
+        SemaphoresData newData = JsonUtility.FromJson<SemaphoresData>(www.downloadHandler.text);
+        HashSet<string> receivedSemaphoreIds = new HashSet<string>();
+
+        // Make Semaphores light up
+        // 1. Get the semaphore data
+        // 2. Check if the semaphore is in the dictionary
+        // 3. If it is, check if the state is true
+        // 4. If it is, light up the semaphore (change the color of the light)
+
+
+        foreach(SemaphoreData semaphoreData in newData.positions)
+        {
+          receivedSemaphoreIds.Add(semaphoreData.id);
+
+          Vector3 semaphorePosition = new Vector3(semaphoreData.x, semaphoreData.z, semaphoreData.y);
+
+          if(!semaphores.ContainsKey(semaphoreData.id))
+          {
+            GameObject newSemaphore = Instantiate(semaphorePrefab, semaphorePosition, Quaternion.identity);
+            semaphores.Add(semaphoreData.id, newSemaphore);
+            semaphoresStates.Add(semaphoreData.id, semaphoreData.state);
+          }
+          else
+          {
+            semaphoresStates[semaphoreData.id] = semaphoreData.state;
+          }
+
+          if(semaphoresStates[semaphoreData.id])
+          {
+            semaphores[semaphoreData.id].GetComponent<Light>().color = Color.green;
+          }
+          else
+          {
+            semaphores[semaphoreData.id].GetComponent<Light>().color = Color.red;
+          }
+        }
+
+        List<string> keysToRemove = new List<string>();
+        foreach(var existingSemaphore in semaphores)
+        {
+          if(!receivedSemaphoreIds.Contains(existingSemaphore.Key))
+          {
+            keysToRemove.Add(existingSemaphore.Key);
+          }
+        }
+
+        foreach(var key in keysToRemove)
+        {
+          Destroy(semaphores[key]);
+          semaphores.Remove(key);
+          semaphoresStates.Remove(key);
+        }
+      }
     }
 }

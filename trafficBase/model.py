@@ -2,6 +2,7 @@
 import networkx as nx
 import json
 import random
+import requests
 import matplotlib.pyplot as plt
 from mesa import Model
 from mesa.time import RandomActivation
@@ -35,6 +36,9 @@ class CityModel(Model):
         self.running = True
         # Add code to place edges
         self.add_edges()
+        self.num_cars = 0
+        self.active_agents = 0
+        self.arrived_agents = 0
 
     def process_cell(self, r, c, col):
         if col in ["v", "^", ">", "<", "u", "g", "h", "k"]:
@@ -64,13 +68,14 @@ class CityModel(Model):
         suitable_corners = [corner for corner in corners if self.is_suitable_for_car(corner)]
 
         if suitable_corners and self.destinations:
-                    start_pos = random.choice(suitable_corners)
-                    destination = random.choice(self.destinations)
-                    car_graph = self.generate_graph_for_car("car_" + str(self.car_id_counter))  # Use the counter for unique ID
-                    car = Car("car_" + str(self.car_id_counter), self, start_pos, destination, car_graph)
-                    self.grid.place_agent(car, start_pos)
-                    self.schedule.add(car)
-                    self.car_id_counter += 1  # Increment the counter after adding a car
+            start_pos = random.choice(suitable_corners)
+            destination = random.choice(self.destinations)
+            car = Car("car_" + str(self.schedule.steps), self, start_pos, destination)
+            self.grid.place_agent(car, start_pos)
+            self.schedule.add(car)
+            self.num_cars += 1
+            self.active_agents += 1
+            self.car_id_counter += 1  # Increment the counter after adding a car
 
     def is_suitable_for_car(self, cell):
         cell_contents = self.grid.get_cell_list_contents(cell)
@@ -187,6 +192,10 @@ class CityModel(Model):
         if self.schedule.steps % 5 == 1:
             self.place_single_car()
 
+        # Make a post request to the server every 100 steps
+        if self.schedule.steps % 100 == 0:
+            post(self.num_cars)
+
     def update_graph_edge_weights(self, agent):
         for edge in self.G.edges:
             start_node, end_node = edge
@@ -214,11 +223,45 @@ class CityModel(Model):
                 }
                 agent_data.append(agent_info)
         return agent_data
-
+      
     def generate_graph_for_car(self, car_id):
         return self.G.copy()
 
+    def get_semaphores(self):
+        semaphore_data = []
+        for semaphore in self.traffic_lights:
+            semaphore_info = {
+                "id": semaphore.unique_id,
+                "x": semaphore.pos[0],
+                "y": semaphore.pos[1],
+                "state": semaphore.state,
+            }
+            semaphore_data.append(semaphore_info)
+        return semaphore_data
 
+
+def post(num_cars):
+    url = "http://52.1.3.19:8585/api/"
+    endpoint = "validate_attempt"
+
+    data = {
+        "year" : 2020,
+        "classroom" : 301,
+        "name" : "Equipo 1",
+        "num_cars": num_cars,
+    }
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url+endpoint, data=json.dumps(data), headers=headers)
+    if response.status_code == 200:
+        print("Request successful")
+    else:
+        print("Request failed")
+    print("Request " + "successful" if response.status_code == 200 else "failed", "Status code:", response.status_code)
+    print("Response:", response.json())
 
 if __name__ == "__main__":
     model = CityModel(N=1, map_file='city_files/2023_base.txt', map_dict_file='city_files/mapDictionary.json')
