@@ -70,7 +70,8 @@ class CityModel(Model):
         if suitable_corners and self.destinations:
             start_pos = random.choice(suitable_corners)
             destination = random.choice(self.destinations)
-            car = Car("car_" + str(self.schedule.steps), self, start_pos, destination)
+            car_graph = self.generate_graph_for_car("car_" + str(self.car_id_counter))
+            car = Car("car_" + str(self.car_id_counter), self, start_pos, destination, car_graph)
             self.grid.place_agent(car, start_pos)
             self.schedule.add(car)
             self.num_cars += 1
