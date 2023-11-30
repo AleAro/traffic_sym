@@ -194,7 +194,7 @@ class CityModel(Model):
 
         # Make a post request to the server every 100 steps
         if self.schedule.steps % 100 == 0:
-            post(self.num_cars)
+            post(self.arrived_agents)
 
     def update_graph_edge_weights(self, agent):
         for edge in self.G.edges:
