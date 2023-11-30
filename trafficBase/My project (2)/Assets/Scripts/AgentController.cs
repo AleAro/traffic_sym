@@ -21,6 +21,7 @@ public class AgentData
         this.x = x;
         this.y = y;
         this.z = z;
+        this.arrived = false;
     }
 }
 
@@ -247,6 +248,14 @@ public class AgentController : MonoBehaviour
                     currPositions[agentData.id] = agentPosition;
                 }
 
+                bool arrived = agentData.arrived;
+                if(arrived) {
+                  // Destroy it and delete it from the rest of the dictionaries
+                  Destroy(agents[agentData.id]);
+                  agents.Remove(agentData.id);
+                  prevPositions.Remove(agentData.id);
+                  currPositions.Remove(agentData.id);
+                }
 
                 currPositions[agentData.id] = agentPosition;
                 // si la current position es diferente a la previous position

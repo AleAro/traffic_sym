@@ -19,6 +19,7 @@ class Car(Agent):
         self.destination = destination
         print(f"Car {self.unique_id} created with start {self.start} and destination {self.destination}")
         self.path = []
+        self.arrived = False
 
     def find_path(self):
         # Directly access the graph
@@ -57,6 +58,7 @@ class Car(Agent):
                 self.model.grid.remove_agent(self)
                 self.model.active_agents -= 1
                 self.model.arrived_agents += 1
+                self.arrived = True
 
         if self.pos is None:
             return

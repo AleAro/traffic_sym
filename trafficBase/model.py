@@ -194,8 +194,9 @@ class CityModel(Model):
             self.place_single_car()
 
         # Make a post request to the server every 100 steps
-        if self.schedule.steps % 100 == 0:
+        '''if self.schedule.steps % 100 == 0:
             post(self.arrived_agents)
+        '''
 
     def update_graph_edge_weights(self, agent):
         for edge in self.G.edges:
@@ -221,10 +222,11 @@ class CityModel(Model):
                     "id": agent.unique_id,
                     "x": agent.pos[0],
                     "y": agent.pos[1],
+                    "arrived": agent.arrived,
                 }
                 agent_data.append(agent_info)
         return agent_data
-      
+
     def generate_graph_for_car(self, car_id):
         return self.G.copy()
 
