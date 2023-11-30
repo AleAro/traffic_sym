@@ -12,9 +12,10 @@ class Car(Agent):
     """
     Car agent that can find paths using A* algorithm.
     """
-    def __init__(self, unique_id, model, start, destination):
+    def __init__(self, unique_id, model, start, destination, graph):
         super().__init__(unique_id, model)
         self.start = start
+        self.graph = graph
         self.destination = destination
         print(f"Car {self.unique_id} created with start {self.start} and destination {self.destination}")
         self.path = []
@@ -24,7 +25,7 @@ class Car(Agent):
         G = self.model.G
         print(G)
         try:
-            self.path = nx.astar_path(G, self.start, self.destination, heuristic)
+            self.path = nx.astar_path(self.graph, self.start, self.destination, heuristic)
             print(f"Car {self.unique_id} found path from {self.start} to {self.destination}")
         except nx.NetworkXNoPath:
             print(f"No path found for {self.unique_id} from {self.start} to {self.destination}")
@@ -34,15 +35,19 @@ class Car(Agent):
         # Get cell in front of the car
         directions = {'Up': (0, 1), 'Down': (0, -1), 'Left': (-1, 0), 'Right': (1, 0)}
         direction = self.get_direction()
-        next_cell = None
         if direction:
             dx, dy = directions[direction]
             front_x, front_y = self.pos[0] + dx, self.pos[1] + dy
-            next_cell = self.model.grid.get_cell_list_contents([(front_x, front_y)])
-        # If the cell is a traffic light, and it is red, do not move
-        if next_cell and isinstance(next_cell[0], Traffic_Light) and not next_cell[0].state:
-            next_step = self.pos
-            return
+            # Ensure next_cell is a list, even if empty
+            next_cell = self.model.grid.get_cell_list_contents([(front_x, front_y)]) if self.model.valid_position(front_x, front_y) else []
+        else:
+            # If there's no direction, set next_cell as an empty list
+            next_cell = []
+
+        # Check if the next cell is a traffic light or another car
+        if any(isinstance(obj, Traffic_Light) and not obj.state for obj in next_cell) or any(isinstance(obj, Car) for obj in next_cell):
+            return  # Stop the car
+
         if self.path:
             next_step = self.path.pop(0)
             self.model.grid.move_agent(self, next_step)
@@ -55,6 +60,12 @@ class Car(Agent):
 
         if self.pos is None:
             return
+
+    # Rest of the original code...
+
+
+    # Rest of the original code for checking cars in the next three cells...
+
 
         # Checamos si hay mas de 3 carros en frente
         neighborhood_three = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False, radius=3)
@@ -84,12 +95,19 @@ class Car(Agent):
                     next_step = self.pos
 
     def recalculate_path(self, start=None, destination=None):
-        # Recalculate the path from the current position to the destination
-        if start:
-            self.start = start
-        if destination:
-            self.destination = destination
-        self.find_path()
+            # Recalculate the path from the current position to the destination
+            if start:
+                self.start = start
+            if destination:
+                self.destination = destination
+
+            # Ensure that the car uses its own graph for recalculating the path
+            try:
+                self.path = nx.astar_path(self.graph, self.start, self.destination, heuristic)
+                print(f"Car {self.unique_id} recalculated path from {self.start} to {self.destination}")
+            except nx.NetworkXNoPath:
+                print(f"No path could be recalculated for {self.unique_id} from {self.start} to {self.destination}")
+                self.path = []
 
     def get_direction(self):
         # get the direction from the path the car is following

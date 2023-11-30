@@ -1,3 +1,4 @@
+#model.py
 import networkx as nx
 import json
 import random
@@ -16,6 +17,7 @@ class CityModel(Model):
         self.traffic_lights = []
         self.destinations = []
         self.G = nx.DiGraph()  # Graph representing the city
+        self.car_id_counter = 0
 
         with open(map_file) as baseFile:
             lines = baseFile.readlines()
@@ -73,6 +75,7 @@ class CityModel(Model):
             self.schedule.add(car)
             self.num_cars += 1
             self.active_agents += 1
+            self.car_id_counter += 1  # Increment the counter after adding a car
 
     def is_suitable_for_car(self, cell):
         cell_contents = self.grid.get_cell_list_contents(cell)
@@ -186,7 +189,6 @@ class CityModel(Model):
 
     def step(self):
         self.schedule.step()
-        # Place a car every 10 steps
         if self.schedule.steps % 5 == 1:
             self.place_single_car()
 
@@ -221,6 +223,9 @@ class CityModel(Model):
                 }
                 agent_data.append(agent_info)
         return agent_data
+      
+    def generate_graph_for_car(self, car_id):
+        return self.G.copy()
 
     def get_semaphores(self):
         semaphore_data = []
